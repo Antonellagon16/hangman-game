@@ -1,0 +1,73 @@
+body {
+    background-color: #ffe6f2;
+    color: #880e4f;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
+
+h1 {
+    color: #d81b60;
+    font-weight: bold;
+}
+
+.difficulty-btn {
+    background-color: #f06292;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.difficulty-btn:hover {
+    background-color: #e91e63;
+}
+
+#letterInput {
+    border: 2px solid #d81b60;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 16px;
+}
+
+#guessBtn {
+    background-color: #ff4081;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 8px 16px;
+    margin-left: 10px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+#guessBtn:hover {
+    background-color: #f50057;
+}
+
+#wrongLetters {
+    color: #d50000;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.shamrock-img {
+    width: 150px;
+    margin-top: 15px;
+}
+
+#restartBtn {
+    background-color: #d50000;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+#restartBtn:hover {
+    background-color: #b71c1c;
+}
