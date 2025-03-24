@@ -55,7 +55,6 @@ function getRandomWord(level) {
     return filteredWords[Math.floor(Math.random() * filteredWords.length)]
 }
 
-
 function updateDifficultyDisplay(level) {
     let difficultyBox = document.getElementById('difficultyBox')
 
@@ -72,3 +71,34 @@ function updateDifficultyDisplay(level) {
     difficultyBox.classList.add(level)
 
 }
+function guessLetter() {
+    let inputField = document.getElementById('letterInput')
+    let guessedLetter = inputField.value.toLowerCase()
+
+    if (!guessedLetter.match(/^[a-z]$/)) {
+        alert('Please enter a valid letter(A-Z)')
+        inputField.value = ''
+        return
+    }
+
+    if (guessedLetters.includes(guessedLetter)) {
+        alert(`You already guessed ${guessedLetter}. Try a different letter!`)
+        inputField.value = ''
+        return
+    } else {
+
+        guessedLetters.push(guessedLetter)
+    }
+
+    if (selectedWord.includes(guessedLetters)) {
+        correctGuess(guessedLetter)
+    } else {
+        wrongGuesses(guessedLetter)
+    }
+
+    inputField.value = ''
+    inputField.focus()
+}
+
+
+
