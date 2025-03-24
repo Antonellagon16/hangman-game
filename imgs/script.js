@@ -14,6 +14,18 @@ function startGame(level) {
     selectedWord = getRandomWord(level)
 
 
+
+
+
+    //update difficulty display div
+    updateDifficultyDisplay(level)
+
+
+    //create the placeholder for the selected words
+    displayedWord = '_'.repeat(selectedWord.length)
+    //display the updated word
+    document.getElementById('wordDisplay').textContent = displayedWord.split('').join(' ')
+
     //hide difficulty selction and show game area
 
     //add d-block to the difficultyselection div
@@ -22,7 +34,7 @@ function startGame(level) {
 
     //remove d-none from difficultyBox & gamearea
 
-    document.getElementById('difficultySelection').classList.remove('d-none')
+    document.getElementById('difficultyBox').classList.remove('d-none')
     document.getElementById('gameArea').classList.remove('d-none')
 
 
@@ -41,4 +53,22 @@ function getRandomWord(level) {
     })
 
     return filteredWords[Math.floor(Math.random() * filteredWords.length)]
+}
+
+
+function updateDifficultyDisplay(level) {
+    let difficultyBox = document.getElementById('difficultyBox')
+
+    //remove any previous difficulty classes
+
+    difficultyBox.classList.remove('easy', 'medium', 'hard')
+
+    //set text & apply class dynamically using template literals
+
+    difficultyBox.textContent = `${level.charAt(0).toUpperCase() + level.slice(1)}`
+
+
+    //apply the appropiate CSS style for cosen difficulty
+    difficultyBox.classList.add(level)
+
 }
