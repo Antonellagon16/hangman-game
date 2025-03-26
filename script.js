@@ -93,7 +93,7 @@ function guessLetter() {
     if (selectedWord.includes(guessedLetters)) {
         correctGuess(guessedLetter)
     } else {
-        wrongGuesses(guessedLetter)
+        wrongGuess(guessedLetter)
     }
 
     inputField.value = ''
@@ -101,4 +101,45 @@ function guessLetter() {
 }
 
 
+function wrongGuess(guessedLetter) {
+    //increment the number of wrong guesses
+    wrongGuesses++
+    //add the guessed letter to the HTML div
+    document.getElementById('wrongLetters').textContent += ` ${guessedLetter}`
 
+
+    document.getElementById('shamrock').src = `imgs/shamrock${6 - wrongGuesses}.jpg`
+
+    //check to see if the number of wrong guesses is equal to maxMistakes if it is, call endGame(false)
+    if (wrongGuesses === maxMistakes) {
+        endGame(false)
+    }
+}
+
+function correctGuess(guessedLetter) {
+    let newDisplayedWord = ''
+    for (let i = 0; i < selectedWord.length; i++) {
+        if (selectedWord[i] === guessedLetter) {
+            newDisplayedWord += guessed > Letter
+        } else {
+            newDisplayedWord += displayedWord[i]
+        }
+    }
+    displayedWord = newDisplayedWord
+    document.getElementById('wordDisplay').textContent = displayedWord.split('').join(' ')
+
+    if (!displayedWord.includes('_')) {
+        endGame(true)
+    }
+}
+function endGame(won) {
+    if (won === true) {
+        setTimeout(() => alert("YAY you won"), 100)
+    } else {
+
+    }
+}
+
+function restartGame() {
+    location.reload()
+}
