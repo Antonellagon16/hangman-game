@@ -1,103 +1,158 @@
-const words = {
-    easy: ["cat", "sun", "car", "hat", "dog"],
-    medium: ["table", "piano", "water", "light", "grass"],
-    hard: ["elephant", "umbrella", "shamrock", "mountain", "cucumber"]
-};
+const wordList = [
+    'gold',
+    'luck',
+    'clover',
+    'rain',
+    'charm',
+    'parade',
+    'leprechaun',
+    'treasure',
+    'celebration',
+    'greenery',
+    'shenanigans',
+    'tradition'
+]
 
-let selectedWord = "";
-let guessedLetters = [];
-let wrongGuesses = 0;
-const maxWrongGuesses = 6;
-let gameOver = false;
+let selectedWord = ''
+let displayedWord = ''
+let wrongGuesses = 0
+let guessedLetters = []
+const maxMistakes = 6
+let gameOver = false
 
-function start--game(difficulty) {
-    const wordList = words[difficulty];
-    selectedWord = wordList[Math.floor(Math.random() * wordList.length)];
-    guessedLetters = [];
-    wrongGuesses = 0;
-    gameOver = false;
+// Sound effects
+const correctSound = new Audio('sounds/correct.mp3')
+const wrongSound = new Audio('sounds/wrong.mp3')
 
-    document.getElementById("difficulty-selection").classList.add("d-none");
-    document.getElementById("game-area").classList.remove("d-none");
+function startGame(level) {
+    selectedWord = getRandomWord(level)
+    updateDifficultyDisplay(level)
+    displayedWord = '_'.repeat(selectedWord.length)
+    document.getElementById('wordDisplay').textContent = displayedWord
+        .split('')
+        .join(' ')
 
-    document.getElementById("difficulty-box").textContent = `Difficulty: ${difficulty.toUpperCase()}`;
-    document.getElementById("difficulty-box").classList.remove("d-none");
+    document.getElementById('difficultySelection').classList.add('d-none')
+    document.getElementById('gameArea').classList.remove('d-none')
+    document.getElementById('difficultyBox').classList.remove('d-none')
+    document.getElementById('gameArea').classList.add('d-block')
+    document.getElementById('difficultyBox').classList.add('d-block')
 
-    updateWordDisplay();
-    updateShamrockImage();
-    document.getElementById("wrong-letters").textContent = "Wrong Guesses:";
-    document.getElementById("end-message").textContent = "";
-    document.getElementById("letter-input").value = "";
+    guessedLetters = []
+    wrongGuesses = 0
+    updateHealthDisplay()
+    document.getElementById('wrongLetters').textContent = ' Wrong Guesses: '
+    document.getElementById('endMessage')?.remove()
+    gameOver = false
 }
 
-function updateWordDisplay() {
-    const display = selectedWord
-        .split("")
-        .map(letter => (guessedLetters.includes(letter) ? letter : "_"))
-        .join(" ");
-    document.getElementById("word-display").textContent = display;
+function getRandomWord(level) {
+    let filteredWords = wordList.filter(word => {
+        if (level === 'easy') return word.length <= 4
+        if (level === 'medium') return word.length >= 5 && word.length <= 7
+        if (level === 'hard') return word.length >= 8
+    })
+    return filteredWords[Math.floor(Math.random() * filteredWords.length)]
 }
 
-function guess--letter() {
-    if (gameOver) return;
+function updateDifficultyDisplay(level) {
+    let difficultyBox = document.getElementById('difficultyBox')
+    difficultyBox.classList.remove('easy', 'medium', 'hard')
+    difficultyBox.textContent = `Difficulty: ${level.charAt(0).toUpperCase() + level.slice(1)}`
+    difficultyBox.classList.add(level)
+}
 
-    const input = document.getElementById("letter-input");
-    const letter = input.value.toLowerCase();
+function guessLetter() {
+    if (gameOver) return
+    let inputField = document.getElementById('letterInput')
+    let guessedLetter = inputField.value.toLowerCase()
 
-    if (!letter || !/^[a-z]$/.test(letter)) {
-        alert("Please enter a valid letter.");
-        input.value = "";
-        return;
+    if (!guessedLetter.match(/^[a-z]$/)) {
+        inputField.value = ''
+        return
     }
 
-    if (guessedLetters.includes(letter)) {
-        alert("You've already guessed that letter.");
-        input.value = "";
-        return;
-    }
-
-    guessedLetters.push(letter);
-
-    if (selectedWord.includes(letter)) {
-        updateWordDisplay();
-        checkWin();
+    if (guessedLetters.includes(guessedLetter)) {
+        inputField.value = ''
+        return
     } else {
-        wrongGuesses++;
-        updateShamrockImage();
-        updateWrongLetters();
-        checkLose();
+        guessedLetters.push(guessedLetter)
     }
 
-    input.value = "";
+    if (selectedWord.includes(guessedLetter)) {
+        correctSound.play()
+        correctGuess(guessedLetter)
+    } else {
+        wrongSound.play()
+        wrongGuess(guessedLetter)
+    }
+
+    inputField.value = ''
+    inputField.focus()
 }
 
-function updateWrongLetters() {
-    const wrongLetters = guessedLetters.filter(letter => !selectedWord.includes(letter));
-    document.getElementById("wrong-letters").textContent = `Wrong Guesses: ${wrongLetters.join(", ")}`;
-}
+function wrongGuess(guessedLetter) {
+    wrongGuesses++
+    document.getElementById('wrongLetters').textContent += ` ${guessedLetter}`
+    updateHealthDisplay()
 
-function updateShamrockImage() {
-    const shamrockImg = document.getElementById("shamrock");
-    shamrockImg.src = `img/shamrock${maxWrongGuesses - wrongGuesses}.jpg`;
-}
-
-function checkWin() {
-    const wordDisplay = selectedWord.split("").every(letter => guessedLetters.includes(letter));
-    if (wordDisplay) {
-        document.getElementById("end-message").textContent = "You Win! 🍀";
-        gameOver = true;
+    if (wrongGuesses === maxMistakes) {
+        endGame(false)
     }
 }
 
-function checkLose() {
-    if (wrongGuesses >= maxWrongGuesses) {
-        document.getElementById("end-message").textContent = `You Lose! The word was: ${selectedWord}`;
-        gameOver = true;
+function correctGuess(guessedLetter) {
+    let newDisplayedWord = ''
+    for (let i = 0; i < selectedWord.length; i++) {
+        if (selectedWord[i] === guessedLetter) {
+            newDisplayedWord += guessedLetter
+        } else {
+            newDisplayedWord += displayedWord[i]
+        }
+    }
+    displayedWord = newDisplayedWord
+    document.getElementById('wordDisplay').textContent = displayedWord
+        .split('')
+        .join(' ')
+    if (!displayedWord.includes('_')) {
+        endGame(true)
     }
 }
 
-function restart--game() {
-    document.getElementById("game-area").classList.add("d-none");
-    document.getElementById("difficulty-selection").classList.remove("d-none");
-    document.getElementById("difficulty-box").classList.add("d-none");
+function endGame(won) {
+    gameOver = true
+    let gameArea = document.getElementById('gameArea')
+    let endMessage = document.createElement('div')
+    endMessage.id = 'endMessage'
+    endMessage.className = 'mt-3 fw-bold p-3 rounded'
+
+    if (won) {
+        endMessage.textContent = 'Congratulations! You guessed the word!'
+        endMessage.classList.add('bg-success', 'text-white')
+    } else {
+        endMessage.textContent = `Game Over! The word was "${selectedWord}".`
+        endMessage.classList.add('bg-danger', 'text-white')
+    }
+
+    gameArea.appendChild(endMessage)
 }
+
+function restartGame() {
+    document.getElementById('difficultySelection').classList.remove('d-none')
+    document.getElementById('gameArea').classList.add('d-none')
+    document.getElementById('difficultyBox').classList.add('d-none')
+    document.getElementById('letterInput').value = ''
+}
+
+function updateHealthDisplay() {
+    let shamrockImg = document.getElementById('shamrock')
+    let imgNum = Math.max(0, 6 - wrongGuesses)
+    shamrockImg.src = `imgs/flower${imgNum}.png`
+}
+
+// Enter key to submit
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !gameOver) {
+        guessLetter()
+    }
+})
