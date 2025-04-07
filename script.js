@@ -1,145 +1,103 @@
-const wordList = [
-    "Pie", "Tea", "Jam", "Egg", "Rye",
-    "Burger", "Pasta", "Muffin", "Pickle", "Waffle",
-    "Chocolate", "Pineapple", "Spaghetti", "Blueberry", "Croissant"
-]
+const words = {
+    easy: ["cat", "sun", "car", "hat", "dog"],
+    medium: ["table", "piano", "water", "light", "grass"],
+    hard: ["elephant", "umbrella", "shamrock", "mountain", "cucumber"]
+};
 
-let selectedWord = ''
-let displayedWord = ''
-let wrongGuesses = 0
-let guessedLetters = []
-const maxMistakes = 6
+let selectedWord = "";
+let guessedLetters = [];
+let wrongGuesses = 0;
+const maxWrongGuesses = 6;
+let gameOver = false;
 
-function startGame(level) {
-    selectedWord = getRandomWord(level)
+function start--game(difficulty) {
+    const wordList = words[difficulty];
+    selectedWord = wordList[Math.floor(Math.random() * wordList.length)];
+    guessedLetters = [];
+    wrongGuesses = 0;
+    gameOver = false;
 
+    document.getElementById("difficulty-selection").classList.add("d-none");
+    document.getElementById("game-area").classList.remove("d-none");
 
+    document.getElementById("difficulty-box").textContent = `Difficulty: ${difficulty.toUpperCase()}`;
+    document.getElementById("difficulty-box").classList.remove("d-none");
 
-
-
-    //update difficulty display div
-    updateDifficultyDisplay(level)
-
-
-    //create the placeholder for the selected words
-    displayedWord = '_'.repeat(selectedWord.length)
-    //display the updated word
-    document.getElementById('wordDisplay').textContent = displayedWord.split('').join(' ')
-
-    //hide difficulty selction and show game area
-
-    //add d-block to the difficultyselection div
-    document.getElementById('difficultySelection').classList.add('d-none')
-
-
-    //remove d-none from difficultyBox & gamearea
-
-    document.getElementById('difficultyBox').classList.remove('d-none')
-    document.getElementById('gameArea').classList.remove('d-none')
-
-
-    //add d-block to difficultyBx & gamearea
-    document.getElementById('gameArea').classList.add('d-block')
-    document.getElementById('difficultyBox').classList.add('d-block')
-
-
+    updateWordDisplay();
+    updateShamrockImage();
+    document.getElementById("wrong-letters").textContent = "Wrong Guesses:";
+    document.getElementById("end-message").textContent = "";
+    document.getElementById("letter-input").value = "";
 }
 
-function getRandomWord(level) {
-    let filteredWords = wordList.filter(word => {
-        if (level === 'easy') return word.length <= 4
-        if (level === 'medium') return word.length > 4 && word.length <= 8
-        if (level === 'hard') return word.length > 8
-    })
-
-    return filteredWords[Math.floor(Math.random() * filteredWords.length)]
+function updateWordDisplay() {
+    const display = selectedWord
+        .split("")
+        .map(letter => (guessedLetters.includes(letter) ? letter : "_"))
+        .join(" ");
+    document.getElementById("word-display").textContent = display;
 }
 
-function updateDifficultyDisplay(level) {
-    let difficultyBox = document.getElementById('difficultyBox')
+function guess--letter() {
+    if (gameOver) return;
 
-    //remove any previous difficulty classes
+    const input = document.getElementById("letter-input");
+    const letter = input.value.toLowerCase();
 
-    difficultyBox.classList.remove('easy', 'medium', 'hard')
-
-    //set text & apply class dynamically using template literals
-
-    difficultyBox.textContent = `${level.charAt(0).toUpperCase() + level.slice(1)}`
-
-
-    //apply the appropiate CSS style for cosen difficulty
-    difficultyBox.classList.add(level)
-
-}
-function guessLetter() {
-    let inputField = document.getElementById('letterInput')
-    let guessedLetter = inputField.value.toLowerCase()
-
-    if (!guessedLetter.match(/^[a-z]$/)) {
-        alert('Please enter a valid letter(A-Z)')
-        inputField.value = ''
-        return
+    if (!letter || !/^[a-z]$/.test(letter)) {
+        alert("Please enter a valid letter.");
+        input.value = "";
+        return;
     }
 
-    if (guessedLetters.includes(guessedLetter)) {
-        alert(`You already guessed ${guessedLetter}. Try a different letter!`)
-        inputField.value = ''
-        return
+    if (guessedLetters.includes(letter)) {
+        alert("You've already guessed that letter.");
+        input.value = "";
+        return;
+    }
+
+    guessedLetters.push(letter);
+
+    if (selectedWord.includes(letter)) {
+        updateWordDisplay();
+        checkWin();
     } else {
-
-        guessedLetters.push(guessedLetter)
+        wrongGuesses++;
+        updateShamrockImage();
+        updateWrongLetters();
+        checkLose();
     }
 
-    if (selectedWord.includes(guessedLetters)) {
-        correctGuess(guessedLetter)
-    } else {
-        wrongGuess(guessedLetter)
-    }
-
-    inputField.value = ''
-    inputField.focus()
+    input.value = "";
 }
 
+function updateWrongLetters() {
+    const wrongLetters = guessedLetters.filter(letter => !selectedWord.includes(letter));
+    document.getElementById("wrong-letters").textContent = `Wrong Guesses: ${wrongLetters.join(", ")}`;
+}
 
-function wrongGuess(guessedLetter) {
-    //increment the number of wrong guesses
-    wrongGuesses++
-    //add the guessed letter to the HTML div
-    document.getElementById('wrongLetters').textContent += ` ${guessedLetter}`
+function updateShamrockImage() {
+    const shamrockImg = document.getElementById("shamrock");
+    shamrockImg.src = `img/shamrock${maxWrongGuesses - wrongGuesses}.jpg`;
+}
 
-
-    document.getElementById('shamrock').src = `imgs/shamrock${6 - wrongGuesses}.jpg`
-
-    //check to see if the number of wrong guesses is equal to maxMistakes if it is, call endGame(false)
-    if (wrongGuesses === maxMistakes) {
-        endGame(false)
+function checkWin() {
+    const wordDisplay = selectedWord.split("").every(letter => guessedLetters.includes(letter));
+    if (wordDisplay) {
+        document.getElementById("end-message").textContent = "You Win! 🍀";
+        gameOver = true;
     }
 }
 
-function correctGuess(guessedLetter) {
-    let newDisplayedWord = ''
-    for (let i = 0; i < selectedWord.length; i++) {
-        if (selectedWord[i] === guessedLetter) {
-            newDisplayedWord += guessed > Letter
-        } else {
-            newDisplayedWord += displayedWord[i]
-        }
-    }
-    displayedWord = newDisplayedWord
-    document.getElementById('wordDisplay').textContent = displayedWord.split('').join(' ')
-
-    if (!displayedWord.includes('_')) {
-        endGame(true)
-    }
-}
-function endGame(won) {
-    if (won === true) {
-        setTimeout(() => alert("YAY you won"), 100)
-    } else {
-
+function checkLose() {
+    if (wrongGuesses >= maxWrongGuesses) {
+        document.getElementById("end-message").textContent = `You Lose! The word was: ${selectedWord}`;
+        gameOver = true;
     }
 }
 
-function restartGame() {
-    location.reload()
+function restart--game() {
+    document.getElementById("game-area").classList.add("d-none");
+    document.getElementById("difficulty-selection").classList.remove("d-none");
+    document.getElementById("difficulty-box").classList.add("d-none");
 }
